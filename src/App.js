@@ -24,7 +24,7 @@ class App extends React.Component {
 
           </Switch>
           <Route path="*" component={ NotFound } />
-          {/* <Route path="/profile/edit" component={ ProfileEdit } /> */}
+          <Route path="/profile/edit" component={ ProfileEdit } />
 
         </BrowserRouter>
 
