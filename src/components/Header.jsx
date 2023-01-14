@@ -1,30 +1,52 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { getUser } from '../services/userAPI';
 import Loading from '../pages/Loading';
 
 export default class Header extends Component {
   state = {
-    userName: '',
-    load: true,
+    loadingFunction: true,
+    userName: {},
   };
 
   componentDidMount() {
-    getUser()
-      .then(({ name }) => this.setState({ userName: name, load: false }));
+    this.fetchUser();
   }
 
+  fetchUser = async () => {
+    const userName = await getUser();
+    this.setState({
+      userName: { ...userName },
+      loadingFunction: false,
+    });
+  };
+
   render() {
-    const { userName, load } = this.state;
+    const { loadingFunction, userName } = this.state;
     return (
-      <div>
-        {load ? <Loading />
+      <header data-testid="header-component">
+        <ul>
+          <li>
+            <Link to="/search" data-testid="link-to-search"> Search </Link>
+          </li>
+          <li>
+            <Link to="/favorites" data-testid="link-to-favorites"> Favorites </Link>
+          </li>
+          <li>
+            <Link to="/profile" data-testid="link-to-profile"> Profile </Link>
+          </li>
+        </ul>
+        { loadingFunction
+          ? <Loading />
           : (
-            <div data-testid="header-component">
-              <h1>Header</h1>
-              <span data-testid="header-user-name">{`Bem Vindo, ${userName}`}</span>
-            </div>
+            <span data-testid="header-user-name">
+              Olá,
+              {userName.name}
+            </span>
+
           )}
-      </div>
+
+      </header>
     );
   }
 }
