@@ -1,72 +1,63 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createUser } from '../services/userAPI';
+import Loading from './Loading';
 
-class Login extends Component {
+export default class Login extends Component {
   state = {
     user: '',
-    isButtonDisabled: true,
-    loading: false,
+    disable: true,
+    load: false,
   };
 
-  onInputChange = (event) => {
-    const { target: { name, value } } = event;
+  handleChange = ({ target }) => {
+    const { value } = target;
     this.setState({
-      [name]: value,
+      user: value,
+      disable: value.length <= 2,
     });
-    const numberThree = 3;
-    if (value.length >= numberThree) {
-      this.setState({
-        isButtonDisabled: false,
-      });
-    }
   };
 
-  buttonSubmit = async () => {
+  handleClick = (event) => {
     const { user } = this.state;
     const { history } = this.props;
-    this.setState({ loading: true }, async () => {
-      await createUser({ name: user });
-      history.push('/search');
-    });
+    event.preventDefault();
+    this.setState({ load: true }, () => createUser({ name: user })
+      .then(() => { history.push('/search'); }));
   };
 
   render() {
-    const { user, isButtonDisabled, loading } = this.state;
+    const { user, disable, load } = this.state;
     return (
-      <div data-testid="page-login">
-        { loading ? <p>Carregando...</p> : (
-          <form>
-            <label htmlFor="user">
-              Nome
-              <input
-                type="text"
-                data-testid="login-name-input"
-                name="user"
-                id="user"
-                value={ user }
-                onChange={ this.onInputChange }
-              />
-            </label>
-            <button
-              type="button"
-              data-testid="login-submit-button"
-              disabled={ isButtonDisabled }
-              onClick={ this.buttonSubmit }
-            >
-              Entrar
-
-            </button>
-          </form>
-
-        ) }
+      <div>
+        { load === false
+          ? (
+            <div data-testid="page-login">
+              <h2>Login</h2>
+              <label htmlFor="name-Login">
+                <input
+                  id="name-Login"
+                  data-testid="login-name-input"
+                  name={ user }
+                  onChange={ this.handleChange }
+                />
+              </label>
+              <button
+                type="submit"
+                data-testid="login-submit-button"
+                disabled={ disable }
+                onClick={ this.handleClick }
+              >
+                Entrar
+              </button>
+            </div>
+          )
+          : <Loading />}
       </div>
     );
   }
 }
 
 Login.propTypes = {
-  history: PropTypes.func,
-}.isRequired;
-
-export default Login;
+  history: PropTypes.shape().isRequired,
+};
